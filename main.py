@@ -1,3 +1,4 @@
+"""Description."""
 import note_book_tkinter
 
 if __name__ == '__main__':
