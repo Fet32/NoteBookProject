@@ -12,4 +12,4 @@ The project is designed to create and store notebooks of arbitrary structure for
 Subsequently, the number of fields can be expanded, key fields changed.
 3. View records. In this part you can:
   3.1. find records by all fields of notebook with the search string
-  3.2. view all entries in the book
+  3.2. view all entries in the book 
