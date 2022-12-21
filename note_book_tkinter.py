@@ -4,7 +4,7 @@ import tkinter.filedialog
 import tkinter.messagebox as mb
 import pickle
 from tkinter import *
-from tkinter import ttk
+from tkinter import constants, ttk
 from note_book import NoteBook as Nb
 from note_book import Contacts
 
@@ -12,6 +12,9 @@ from note_book import Contacts
 class VisualNoteBook:
 
     def __init__(self):
+        self.__read_settings()
+        self.row_point = 10
+        self.func_dict = {'entry': ttk.Entry, 'combobox': ttk.Combobox}
         self.fields_list = []
         self.fields_list_val = []
         self.__init_root()
@@ -32,15 +35,36 @@ class VisualNoteBook:
         self.mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
         self.__init_main_fields()
 
+    def _create_widget_books_dir(self):
+        """Create widget for books_dir."""
+        label = ttk.Label(self.mainframe, text='Notebooks dir', width=20)
+        label.grid(column=1, row=self.row_point, sticky=W)
+
+        name_kind = 'books_dir_entry'
+        setattr(self, name_kind + '_label', label)  # TODO will be removed
+
+        name = StringVar()
+        setattr(self, 'books_dir', name)  # TODO will be removed
+
+        widget = ttk.Entry(master=self.mainframe, textvariable=name, width=30)
+        widget.grid(column=2, row=self.row_point, sticky=constants.EW, columnspan=9)
+
+        name.set(Nb.get_books_dir())
+
+        self.row_point += 1
+
+        button = ttk.Button(master=self.mainframe, text='Change dir', command=self.__change_dir)
+        button.grid(column=1, row=self.row_point, sticky=constants.EW, columnspan=10)
+
+        self.row_point += 1
+
     def __init_main_fields(self):
-        self.__read_settings()
         ttk.Label(self.mainframe, text='Settings').grid(column=1, row=1, columnspan=10, pady=10)
-        self.row_point = 10
-        self.func_dict = {'entry': ttk.Entry, 'combobox': ttk.Combobox}
         main_fields_list = list()
-        main_fields_list.append(
-            {'name': 'books_dir', 'type': 'entry', 'text': 'Notebooks dir', 'command': self.__change_dir,
-             'command_name': 'Change dir', 'val_func': Nb.get_books_dir})
+
+        #main_fields_list.append(
+        #    {'name': 'books_dir', 'type': 'entry', 'text': 'Notebooks dir', 'command': self.__change_dir,
+        #     'command_name': 'Change dir', 'val_func': Nb.get_books_dir})
 
         main_fields_list.append(
             {'name': 'user_name', 'type': 'combobox', 'text': 'User name', 'command': self.__change_user,
@@ -53,6 +77,8 @@ class VisualNoteBook:
         main_fields_list.append(
             {'name': 'field_name', 'type': 'entry', 'text': 'Enter new field name', 'command': self.add_new_field,
              'command_name': 'Add field (Ctrl+Enter)', 'focus': True})
+
+        self._create_widget_books_dir()
 
         for item in main_fields_list:
             self.__add_field(item)
