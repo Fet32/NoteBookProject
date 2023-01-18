@@ -58,4 +58,5 @@ target/
 
 .idea
 settings.cfg
+last_settings.json
 notebook
