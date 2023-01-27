@@ -69,14 +69,14 @@ class VisualNoteBook:
         # root.rowconfigure(5, weight=1)
         # root.rowconfigure(6, weight=1)
 
+        root.title('Work with notebooks')
+        root.resizable = True
+        root.state('zoomed')
+
         root['borderwidth'] = 2
         root['relief'] = 'sunken'
 
-        root.title('Work with notebooks')
-        root.resizable = True
         root.bind('<Control-Return>', self.add_new_field)
-
-        root.state('zoomed')
 
         return root
 
@@ -324,7 +324,7 @@ class VisualNoteBook:
         return self._create_frame_table_view()
 
     def _delete_frame_table_view(self):
-        if getattr(self, 'frame_table_view', False):
+        if getattr(self, 'frame_book_table_view', False):
             self.frame_book_table_view.destroy()
 
     def _create_frame_table_view(self):
@@ -406,10 +406,10 @@ class VisualNoteBook:
 
     def _refresh_book_frames(self):
         self.frame_book_fields = self._refresh_frame_book_fields()
-        self.frame_book_fields.grid(column=0, row=4, sticky=constants.NSEW)
+        self._grid_frame(self.frame_book_fields, 3, 2, 1)
 
         self.frame_book_table_view = self._refresh_frame_table_view()
-        self.frame_book_table_view.grid(column=0, row=6, sticky=constants.NSEW)
+        self._grid_frame(self.frame_book_table_view, 5, 1, 1)
 
     def _refresh_users(self):
         users_list = NoteBook.get_usernames()
@@ -460,7 +460,7 @@ class VisualNoteBook:
             if hasattr(self, 'book'):
                 del self.book
 
-    def add_new_field(self, *args):
+    def add_new_field(self):
         field_name_entry = self.frame_fields_header.children.get('field_name_entry')
         field_name = field_name_entry.get()
 
