@@ -83,27 +83,27 @@ class VisualNoteBook:
     def _init_frames(self):
 
         self.frame_dir = self._create_frame_books_dir()
-        self.grid_frame(self.frame_dir, 0, 2, 1)
+        self._grid_frame(self.frame_dir, 0, 2, 1)
 
         self.frame_settings = self._create_frame_book_settings()
-        self.grid_frame(self.frame_settings, 1, 2, 1)
+        self._grid_frame(self.frame_settings, 1, 2, 1)
 
         self._init_settings()
 
         self.frame_fields_header = self._create_frame_book_fields_header()
-        self.grid_frame(self.frame_fields_header, 2, 2, 1)
+        self._grid_frame(self.frame_fields_header, 2, 2, 1)
 
         self.frame_book_fields = self._create_frame_book_fields()
-        self.grid_frame(self.frame_book_fields, 3, 2, 1)
+        self._grid_frame(self.frame_book_fields, 3, 2, 1)
 
         self.frame_search = self._create_frame_book_search()
-        self.grid_frame(self.frame_search, 4, 1, 1)
+        self._grid_frame(self.frame_search, 4, 1, 1)
 
         self.frame_book_table_view = self._create_frame_table_view()
-        self.grid_frame(self.frame_book_table_view, 5, 1, 1)
+        self._grid_frame(self.frame_book_table_view, 5, 1, 1)
 
     @staticmethod
-    def grid_frame(frame, grid_row, frame_columns_count, frame_rows_count):
+    def _grid_frame(frame, grid_row, frame_columns_count, frame_rows_count):
 
         frame.grid(column=0, row=grid_row)
 
