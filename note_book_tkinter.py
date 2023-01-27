@@ -81,45 +81,37 @@ class VisualNoteBook:
         return root
 
     def _init_frames(self):
+
         self.frame_dir = self._create_frame_books_dir()
-        self.frame_dir.grid(column=0, row=0)
-        self.configure_columns_rows(self.frame_dir, [0, 1], [0])
+        self.grid_frame(self.frame_dir, 0, 2, 1)
 
         self.frame_settings = self._create_frame_book_settings()
-        self.frame_settings.grid(column=0, row=1)
-        self.configure_columns_rows(self.frame_settings, [0, 1], [0])
+        self.grid_frame(self.frame_settings, 1, 2, 1)
 
         self._init_settings()
 
         self.frame_fields_header = self._create_frame_book_fields_header()
-        self.frame_fields_header.grid(column=0, row=3)
-        self.configure_columns_rows(self.frame_fields_header, [0, 1], [0])
+        self.grid_frame(self.frame_fields_header, 2, 2, 1)
 
         self.frame_book_fields = self._create_frame_book_fields()
-        self.frame_book_fields.grid(column=0, row=4)
-        self.configure_columns_rows(self.frame_book_fields, [0, 1], [0])
+        self.grid_frame(self.frame_book_fields, 3, 2, 1)
 
         self.frame_search = self._create_frame_book_search()
-        self.frame_search.grid(column=0, row=5)
-        self.configure_columns_rows(self.frame_search, [0], [0])
+        self.grid_frame(self.frame_search, 4, 1, 1)
 
         self.frame_book_table_view = self._create_frame_table_view()
-        self.frame_book_table_view.grid(column=0, row=6)
-        self.configure_columns_rows(self.frame_book_table_view, [0], [0])
-
-    def configure_columns_rows(self, frame, columns, rows):
-        self.configure_columns(frame, columns)
-        self.configure_rows(frame, rows)
+        self.grid_frame(self.frame_book_table_view, 5, 1, 1)
 
     @staticmethod
-    def configure_columns(frame, columns):
-        for column in columns:
-            frame.grid_columnconfigure(column, weight=1, minsize=150)
+    def grid_frame(frame, grid_row, frame_columns_count, frame_rows_count):
 
-    @staticmethod
-    def configure_rows(frame, rows):
-        for row in rows:
-            frame.grid_rowconfigure(row, weight=1, minsize=21)
+        frame.grid(column=0, row=grid_row)
+
+        for i in range(frame_columns_count):
+            frame.grid_columnconfigure(i, weight=1, minsize=150)
+
+        for i in range(frame_rows_count):
+            frame.grid_rowconfigure(i, weight=1, minsize=21)
 
     def _init_settings(self):
         self._init_settings_books_dir()
