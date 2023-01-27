@@ -83,31 +83,29 @@ class VisualNoteBook:
     def _init_frames(self):
         self.frame_dir = self._create_frame_books_dir()
         self.frame_dir.grid(column=0, row=0)
-        self.configure_columns(self.frame_dir, [0, 1])
-        self.configure_rows(self.frame_dir, [0])
+        self.configure_columns_rows(self.frame_dir, [0, 1], [0])
 
         self.frame_settings = self._create_frame_book_settings()
         self.frame_settings.grid(column=0, row=1)
-        self.configure_columns(self.frame_dir, [0, 1])
-        self.configure_rows(self.frame_dir, [0])
+        self.configure_columns_rows(self.frame_settings, [0, 1], [0])
 
         self._init_settings()
 
         self.frame_fields_header = self._create_frame_book_fields_header()
         self.frame_fields_header.grid(column=0, row=3)
-        self.configure_columns_rows(self.frame_dir, [0, 1], [0])
+        self.configure_columns_rows(self.frame_fields_header, [0, 1], [0])
 
         self.frame_book_fields = self._create_frame_book_fields()
         self.frame_book_fields.grid(column=0, row=4)
-        self.configure_columns_rows(self.frame_dir, [0, 1], [0])
+        self.configure_columns_rows(self.frame_book_fields, [0, 1], [0])
 
         self.frame_search = self._create_frame_book_search()
         self.frame_search.grid(column=0, row=5)
-        self.configure_columns_rows(self.frame_dir, [0], [0])
+        self.configure_columns_rows(self.frame_search, [0], [0])
 
         self.frame_book_table_view = self._create_frame_table_view()
         self.frame_book_table_view.grid(column=0, row=6)
-        self.configure_columns_rows(self.frame_dir, [0], [0])
+        self.configure_columns_rows(self.frame_book_table_view, [0], [0])
 
     def configure_columns_rows(self, frame, columns, rows):
         self.configure_columns(frame, columns)
