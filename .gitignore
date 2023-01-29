@@ -2,3 +2,4 @@
 settings.cfg
 *.json
 notebook
+__pycache__
