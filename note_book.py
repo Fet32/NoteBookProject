@@ -40,6 +40,14 @@ class NoteBook:
             return [item for item in os.listdir(cls.noteBookDir) if os.path.isdir(os.path.join(cls.noteBookDir, item))]
 
     @classmethod
+    def check_user_existence(cls, username: str):
+        return username in cls.get_usernames()
+
+    @classmethod
+    def check_book_existence(cls, bookname: str, username: str):
+        return bookname in cls.get_books_names(username)
+
+    @classmethod
     def get_books_names(cls, username):
         if not username:
             return []

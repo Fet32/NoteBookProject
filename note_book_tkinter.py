@@ -4,40 +4,70 @@ from tkinter import constants, ttk, messagebox, filedialog, Tk, StringVar, Boole
 from note_book import NoteBook
 from note_book import Contacts
 
+from frames import BookFrame
+
+from typing import Optional
+
+from pydantic import BaseModel
+
+
+class NoteBookConfig(BaseModel):
+
+    books_dir: Optional[StringVar]
+    user_name: Optional[StringVar]
+    book_name: Optional[StringVar]
+
+    class Config:
+        arbitrary_types_allowed = True
+
 
 class VisualNoteBook:
 
-    def __init__(self):
+    def __init__(self, last_config: str):
+        self.config_file_name = last_config
 
-        self.frame_dir = None
-        self.frame_settings = None
-        self.frame_fields_header = None
+        # todo set up DB instance here, in the start of init
+
+        self.root = self._init_root()
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+        self.config: NoteBookConfig = self.read_settings()
+
+        self._create_frame_books_dir()
+
+        self.frame_settings = BookFrame(
+            master=self.root, padding='3 3 12 12', config=self.config,
+        )
+
+        self.frame_fields_header = self._create_frame_book_fields_header()
         self.frame_book_fields = None
         self.frame_search = None
         self.frame_book_table_view = None
 
-        self.settings = self._read_settings()
-
-        self.books_dir = ''
-        self.user_name = ''
-        self.book_name = ''
-        self.field_name = ''
+        self.field_name: StringVar
         self.dict_fields = {}
-
-        self.root = self._init_root()
-        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         self._init_frames()
 
         self.root.mainloop()
 
-    @staticmethod
-    def _read_settings():
+    def read_settings(self):
         try:
-            with (open('last_settings.json', 'r')) as file_d:
-                return json.load(file_d)
-        except:
-            return {}
+            with open(self.config_file_name, 'r') as file_d:
+
+                settings_data = json.load(file_d)
+
+                for k, v in settings_data.items():
+                    sv = StringVar()
+                    sv.set(v)
+                    settings_data[k] = sv
+
+                config = NoteBookConfig(**settings_data)
+
+                return config
+
+        except Exception as exc:  # todo work with exceptions
+            return NoteBookConfig()
 
     def on_closing(self):
         self._save_settings()
@@ -48,10 +78,10 @@ class VisualNoteBook:
             settings = {
                 'books_dir': self.books_dir.get(),
                 'user_name': self.user_name.get(),
-                'book_name': self.book_name.get()
+                'book_name': self.book_name.get(),
             }
 
-            with (open('last_settings.json', 'w')) as file_d:
+            with open(self.config_file_name, 'w') as file_d:
                 json.dump(settings, file_d)
 
         except Exception as inst:
@@ -71,7 +101,7 @@ class VisualNoteBook:
 
         root.title('Work with notebooks')
         root.resizable = True
-        root.state('zoomed')
+        root.state('normal')  # TODO integration
 
         root['borderwidth'] = 2
         root['relief'] = 'sunken'
@@ -82,16 +112,17 @@ class VisualNoteBook:
 
     def _init_frames(self):
 
-        self.frame_dir = self._create_frame_books_dir()
-        self._grid_frame(self.frame_dir, 0, 2, 1)
+        #frame_dir = self._create_frame_books_dir()
+        #self._grid_frame(frame_dir, 0, 2, 1)
 
-        self.frame_settings = self._create_frame_book_settings()
-        self._grid_frame(self.frame_settings, 1, 2, 1)
+        #self.frame_settings = self._create_frame_book_settings()
+        #self._grid_frame(self.frame_settings, 1, 2, 1)
 
-        self._init_settings()
+        self._init_settings_books()
+        self._initialize_book()
 
-        self.frame_fields_header = self._create_frame_book_fields_header()
-        self._grid_frame(self.frame_fields_header, 2, 2, 1)
+        #self.frame_fields_header = self._create_frame_book_fields_header()
+        #self._grid_frame(self.frame_fields_header, 2, 2, 1)
 
         self.frame_book_fields = self._create_frame_book_fields()
         self._grid_frame(self.frame_book_fields, 3, 2, 1)
@@ -113,36 +144,15 @@ class VisualNoteBook:
         for i in range(frame_rows_count):
             frame.grid_rowconfigure(i, weight=1, minsize=21)
 
-    def _init_settings(self):
-        self._init_settings_books_dir()
-        self._init_settings_users()
-        self._init_settings_books()
-        self._initialize_book()
-
-    def _init_settings_books_dir(self):
-        if self.settings.get('books_dir', False):
-            NoteBook.set_books_dir(self.settings['books_dir'])
-            self.books_dir.set(NoteBook.get_books_dir())
-
-    def _init_settings_users(self):
-        users_list = NoteBook.get_usernames()
-        self.frame_settings.children.get('user_name_combobox')['values'] = users_list
-
-        if self.settings.get('user_name', False):
-            if self.settings['user_name'] in users_list:
-                self.user_name.set(self.settings['user_name'])
-            else:
-                self._show_info('Don`t find user {} from last settings'.format(self.settings['user_name']))
-
     def _init_settings_books(self):
         books_list = self._get_books_name()
         self.frame_settings.children.get('book_name_combobox')['values'] = books_list
 
-        if self.settings.get('book_name', False):
-            if self.settings['book_name'] in books_list:
-                self.book_name.set(self.settings['book_name'])
-            else:
-                self._show_info('Don`t find book with name {} from last settings'.format(self.settings['book_name']))
+        if self.config.book_name and not NoteBook.check_book_existence(self.config.book_name.get(), self.config.user_name.get()):
+            self._show_info(
+                'Don`t find book with name {} from last settings'.format(self.config.book_name),
+            )
+            self.config.book_name.set('')
 
     def _create_frame_books_dir(self):
         """Create frame for books_dir."""
@@ -167,7 +177,17 @@ class VisualNoteBook:
         button = ttk.Button(master=frame, text='Change dir', command=self._change_dir)
         button.grid(column=0, row=2, sticky=constants.NSEW, columnspan=2)
 
-        return frame
+        if self.config.books_dir:
+
+            NoteBook.set_books_dir(self.config.books_dir.get())
+            self.books_dir.set(NoteBook.get_books_dir())
+
+        self._grid_frame(frame, 0, 2, 1)
+
+        #return frame
+
+    def _create_frame_book_settings_2(self):
+        return BookFrame(master=self.root, padding='3 3 12 12', config=self.config)
 
     def _create_frame_book_settings(self):
         """Create frame for settings with username, book name"""
@@ -176,11 +196,13 @@ class VisualNoteBook:
         label = ttk.Label(frame, text='User name', width=20)
         label.grid(column=0, row=0, sticky=constants.W)
 
-        var = StringVar()
-        self.user_name = var  # TODO will be removed
-
-        widget = ttk.Combobox(master=frame, textvariable=var, name='user_name_combobox', width=1030,
-                              values=NoteBook.get_usernames())
+        widget = ttk.Combobox(
+            master=frame,
+            textvariable=self.config.user_name,
+            name='user_name_combobox',
+            width=1030,
+            values=NoteBook.get_usernames(),
+        )
 
         widget.grid(column=1, row=0, sticky=constants.EW)
         if widget['values']:
@@ -192,11 +214,13 @@ class VisualNoteBook:
         label = ttk.Label(frame, text='Notebook name', width=20)
         label.grid(column=0, row=1, sticky=constants.W)
 
-        var = StringVar()
-        self.book_name = var  # TODO will be removed
-
-        widget = ttk.Combobox(master=frame, textvariable=var, name='book_name_combobox', width=1030,
-                              values=self._get_books_name())
+        widget = ttk.Combobox(
+            master=frame,
+            textvariable=self.config.book_name,
+            name='book_name_combobox',
+            width=1030,
+            values=self._get_books_name(),
+        )
 
         widget.grid(column=1, row=1, sticky=constants.EW)
         if widget['values']:
@@ -204,6 +228,18 @@ class VisualNoteBook:
 
         widget.bind('<<ComboboxSelected>>', self._change_book)
         widget.bind('<FocusOut>', self._change_book)
+
+        self._grid_frame(frame, 1, 2, 1)
+
+        #frame.children.get('user_name_combobox')['values'] = NoteBook.get_usernames() todo
+
+        #frame.children.get('user_name_combobox')['values'] = NoteBook.get_usernames() todo
+
+        if self.config.user_name and not NoteBook.check_user_existence(self.config.user_name.get()):
+            self._show_info(
+                'Don`t find user {} from last settings'.format(self.config.user_name.get()),
+            )
+            self.config.user_name.set('')
 
         return frame
 
@@ -232,6 +268,8 @@ class VisualNoteBook:
 
         label = ttk.Label(frame, text='Value')
         label.grid(column=1, row=3, sticky=constants.EW)
+
+        self._grid_frame(frame, 2, 2, 1)
 
         return frame
 
@@ -388,7 +426,7 @@ class VisualNoteBook:
             table_view.delete(i)
 
     def _get_books_name(self):
-        return NoteBook.get_books_names(self.user_name.get())
+        return NoteBook.get_books_names(self.config.user_name.get())
 
     def _change_dir(self):
         dir_name = filedialog.askdirectory()
@@ -431,8 +469,8 @@ class VisualNoteBook:
         book_name_combobox = self.frame_settings.children.get('book_name_combobox')
         book_name_combobox['values'] = books_list
 
-        if not self.book_name.get() in books_list:
-            self.book_name.set('')
+        if not self.config.book_name.get() in books_list:
+            self.config.book_name.set('')
 
             if book_name_combobox['values']:
                 book_name_combobox.current(0)
@@ -443,10 +481,10 @@ class VisualNoteBook:
 
         self.dict_fields = {}
 
-        user_name = self.user_name.get()
-        book_name = self.book_name.get()
+        user_name = self.config.user_name.get()
+        book_name = self.config.book_name.get()
 
-        if user_name and book_name:
+        if self.config.user_name.get() and self.config.book_name.get():
 
             self.book = NoteBook(user_name, book_name)
             self.books_dir.set(NoteBook.get_books_dir())
