@@ -83,8 +83,8 @@ num_req = 100
 ##############################################
 
 # db_test.execute(query='insert into user (name) values ("Fet")')
-# db_test.execute(query='insert into book (name,user_id) values ("book1", 12)')
-# for i in range(2,10):
+# db_test.execute(query='insert into book (name,user_id) values ("book1", 1)')
+# for i in range(1,10):
 # 	db_test.execute(query='insert into book_field (field_name, field_type, book_id) values ("field%s","txt",1)'%i)
 # for record in range(2000):
 # 	for i in range(1,10):
