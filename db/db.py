@@ -78,30 +78,30 @@ db_test = MySQL()
 nb = Notebook(db=db_test)
 nb.connect_db()
 
-num_req = 100
+num_req = 20000
 
 ##############################################
 
-# db_test.execute(query='insert into user (name) values ("Fet")')
-# db_test.execute(query='insert into book (name,user_id) values ("book1", 1)')
-# for i in range(1,10):
-# 	db_test.execute(query='insert into book_field (field_name, field_type, book_id) values ("field%s","txt",1)'%i)
-# for record in range(2000):
-# 	for i in range(1,10):
-# 		db_test.execute(query='''
+#db_test.execute(query='insert into user (name) values ("Fet")')
+#db_test.execute(query='insert into book (name,user_id) values ("book1", 1)')
+#for i in range(1,10):
+#	db_test.execute(query='insert into book_field (field_name, field_type, book_id) values ("field%s","txt",1)'%i)
+#for record in range(2000):
+#	for i in range(1,10):
+#		db_test.execute(query='''
 # 							insert into book_record
 # 							(record_id, field_id, value_num, value_txt)
 # 							values
 # 							(%(record)d, %(i)d, %(i)d, "field%(i)s")
 # 							''' % {'record': record, 'i': i})
-#
-# db_test.commit()
+
+#db_test.commit()
 
 start_a = time.perf_counter()
 all_types = db_test.execute(query='SELECT * FROM book_field')
 
 for i in range(num_req):
-	r = db_test.execute(query='SELECT * FROM book_record WHERE value_txt="field5"')
+	db_test.execute(query='SELECT id, record_id, field_id FROM book_record WHERE value_txt="field5"')
 
 fin_a = time.perf_counter() - start_a
 print('---> only select', fin_a)
@@ -113,10 +113,10 @@ start_b = time.perf_counter()
 for i in range(num_req):
 
 	QUERY_SELECT_JOIN = """
-	SELECT book_record.id, book_record.record_id, book_record.field_id, book_field.field_name
+	SELECT book_record.id, book_record.record_id, book_field.field_name
 	FROM book_record
 	INNER JOIN book_field
-	ON book_record.field_id=book_field.id and field_name="field5";
+	ON book_record.field_id=book_field.id and book_record.value_txt="field5";
 	"""
 
 	db_test.execute(query=QUERY_SELECT_JOIN)
@@ -127,4 +127,3 @@ print('---> with join', fin_b)
 print('---> diff', fin_b / fin_a)
 
 nb.close_db()
-
